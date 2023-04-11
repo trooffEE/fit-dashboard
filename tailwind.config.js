@@ -6,7 +6,18 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
+    colors: {
+      primary: '#C15A38',
+      primaryDark: '#803b25',
+      secondary: '#456990',
+      white: '#FEFFFE',
+      whiteSecondary: '#E9EBF8',
+      gray: '#B4B8C5',
+    },
     extend: {
+      gridTemplateColumns: {
+        layout: '120px repeat(12, minmax(0, 1fr))'
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
