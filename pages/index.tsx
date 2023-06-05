@@ -1,72 +1,68 @@
 import dayjs from 'dayjs'
+import _ from 'lodash'
 import { useEffect, useState } from 'react'
-import { CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Line, LineChart, Area, ComposedChart } from 'recharts'
+import {
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Line,
+  LineChart,
+  Area,
+  ComposedChart,
+} from 'recharts'
 import GraphContainer from '~/components/GraphContainer'
+import LoaderContent from '~/components/LoaderContent'
+import NoSSR from '~/components/NoSSR'
+import useFetch from '~/hooks/fetch'
+import { DashboardResponse, fetchDashboard } from '~/services/dashboard'
 import { getColors } from '~/utils/getColors'
 
-const weekdays = dayjs.weekdaysShort(true).map((weekday) => {
-  return weekday[0].toUpperCase() + weekday.slice(1)
-})
-
-/**
- * {
- *    name: 'sleep-graph',
- *    data: [
- *      {
- *        name: 'строка-дня-недели в формате ISO или обговорим'
- *        sleepNeeded: number,
- *        sleepActual: number
- *      }
- *    ]
- *
- * }
- */
-const sleepData = weekdays.map((weekday) => {
-  return {
-    name: weekday,
-    sleepNeeded: +(Math.random() * 10).toFixed(2),
-    sleepActual: +(Math.random() * 10).toFixed(2),
-  }
-})
-let caloriesData = weekdays.map((weekday) => {
-  return {
-    name: weekday,
-    caloriesNeeded: +(Math.random() * 3500).toFixed(),
-    caloriesActual: +(Math.random() * 2500).toFixed(),
-  }
-})
-
-const averageCalories = +(
-  caloriesData.reduce((acc, cur) => (acc += cur.caloriesActual), 0) / caloriesData.length
-).toFixed()
-const averageCaloriesNeeded = +(
-  caloriesData.reduce((acc, cur) => (acc += cur.caloriesNeeded), 0) / caloriesData.length
-).toFixed()
-caloriesData = caloriesData.map((calory) => ({ ...calory, averageCalories, averageCaloriesNeeded }))
+const dataConverter = (data: DashboardResponse['data']) => {
+  const dataSorted = _.sortBy(data, (dataItem) => {
+    return dayjs(dataItem.date).unix()
+  }).map((item) => ({
+    name: dayjs(item.date).format('ddd'),
+    needed: item.plan,
+    actual: item.actual,
+    avgPlan: item.planAvg,
+    avgActual: item.actualAvg,
+  }))
+  return dataSorted
+}
 
 const c = getColors()
 
-const SleepGraph = () => (
-  <ResponsiveContainer width="100%" height={500}>
-    <LineChart width={600} height={400} data={sleepData}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="name" stroke={c.whiteSecondary} strokeWidth={2} />
-      <YAxis scale="auto" stroke={c.whiteSecondary} strokeWidth={2} />
-      <Tooltip wrapperStyle={{ background: 'red' }} />
-      <Line type="monotone" dataKey="sleepNeeded" stroke={'#F1D16F'} strokeWidth={3} fill={'#F1D16F'} />
-      <Line type="monotone" dataKey="sleepActual" stroke={'#ADDACC'} strokeWidth={3} fill="#82ca9d" />
-    </LineChart>
-  </ResponsiveContainer>
-)
+const SleepGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ data }) => {
+  const dataInner = dataConverter(data)
+  return (
+    <ResponsiveContainer width="100%" height={500}>
+      <LineChart width={600} height={400} data={dataInner}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" stroke={c.whiteSecondary} strokeWidth={2} />
+        <YAxis scale="auto" stroke={c.whiteSecondary} strokeWidth={2} />
+        <Tooltip wrapperStyle={{ background: 'red' }} />
+        <Line type="monotone" dataKey="needed" stroke={'#F1D16F'} strokeWidth={3} fill={'#F1D16F'} />
+        <Line type="monotone" dataKey="actual" stroke={'#ADDACC'} strokeWidth={3} fill="#82ca9d" />
+      </LineChart>
+    </ResponsiveContainer>
+  )
+}
 
-const CaloriesConsumedGraph = () => {
+const CaloriesConsumedGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ data }) => {
   const caloriesNeededColor = '#47C6A0'
   const caloriesActualColor = '#F1D16F'
   const stopOpacityStart = 0.7
   const stopOpacityEnd = 0.2
   return (
     <ResponsiveContainer width="100%" height={500}>
-      <ComposedChart width={730} height={250} data={caloriesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <ComposedChart
+        width={730}
+        height={250}
+        data={dataConverter(data)}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+      >
         <defs>
           <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor={caloriesNeededColor} stopOpacity={stopOpacityStart} />
@@ -97,48 +93,65 @@ const CaloriesConsumedGraph = () => {
         />
         <Line
           type="monotone"
-          dataKey="averageCalories"
+          dataKey="avgActual"
           stroke={caloriesActualColor}
           strokeWidth={3}
           fill={c.whiteSecondary}
         />
-        <Line
-          type="monotone"
-          dataKey="averageCaloriesNeeded"
-          stroke={caloriesNeededColor}
-          strokeWidth={3}
-          fill={c.whiteSecondary}
-        />
+        <Line type="monotone" dataKey="avgPlan" stroke={caloriesNeededColor} strokeWidth={3} fill={c.whiteSecondary} />
       </ComposedChart>
     </ResponsiveContainer>
   )
 }
 
+
 export default function Home() {
-  const [currentTimeString, setCurrentTimeString] = useState<string | null>(null)
+  const [data, isLoading] = useFetch(fetchDashboard)
+  const [dataSleep, setDataSleep] = useState<DashboardResponse['data'] | null>(null)
+  const [dataCalories, setDataCalories] = useState<DashboardResponse['data'] | null>(null)
 
   useEffect(() => {
-    const timerId = setInterval(() => {
-      setCurrentTimeString(dayjs().format('dddd LTS'))
-    }, 1000)
-    return () => clearInterval(timerId)
-  }, [])
+    if (data) {
+      data.forEach((item) => {
+        switch (item.type) {
+          case 'sleep':
+            setDataSleep(item.data)
+            break
+          case 'calories':
+            setDataCalories(item.data)
+            break
+          default:
+            break
+        }
+      })
+    }
+  }, [data])
 
-  return (
-    <>
-      <div className="py-4 text-center">
-        <span className="font-bold">Дашборд 🤟</span> {currentTimeString && <span>Сейчас - {currentTimeString}</span>}
-      </div>
-      <main className="grid grid-cols-4 gap-6">
+  if (!dataSleep) return null
+
+  const content = (
+    <main className="grid grid-cols-4 gap-6">
+      {dataSleep && (
         <GraphContainer className="col-span-2">
-          <SleepGraph />
+          <SleepGraph data={dataSleep} />
           <div className="pt-4 text-center">Сон</div>
         </GraphContainer>
+      )}
+      {dataCalories && (
         <GraphContainer className="col-span-2">
-          <CaloriesConsumedGraph />
+          <CaloriesConsumedGraph data={dataCalories} />
           <div className="pt-4 text-center">Калории</div>
         </GraphContainer>
-      </main>
-    </>
+      )}
+    </main>
+  )
+
+  return (
+    <NoSSR>
+      <div className="mb-10 py-4 text-center">
+        <span className="text-xl font-bold">Дашборд 🤟</span>
+      </div>
+      <LoaderContent isLoading={isLoading} content={content} />
+    </NoSSR>
   )
 }
