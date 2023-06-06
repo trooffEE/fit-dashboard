@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { checkCode } from '~/utils/checkCode'
 import { backendApiString } from '~/utils/constants'
 
 export type ExerciseResponse = {
@@ -37,16 +38,15 @@ export type ExerciseResponse = {
   enabled: boolean
 }
 
-export const fetchAllExercises = () => {
-  const name = localStorage.getItem('username')
-
+export const fetchAllExercises = (userName: string) => {
   return axios<ExerciseResponse[]>({
     method: 'get',
-    url: backendApiString(`/public/trainings?username=${name}`),
+    url: backendApiString(`/public/trainings?username=${userName}`),
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json',
     },
     withCredentials: false,
   })
+    .then(res => res)
 }
