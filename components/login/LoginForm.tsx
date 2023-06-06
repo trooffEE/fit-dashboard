@@ -1,5 +1,6 @@
 import Router from 'next/router'
 import React, { useContext, useRef, useState } from 'react'
+import { toast } from 'react-toastify'
 import { AuthContext } from '~/contexts/auth'
 
 const LoginForm = ({ loginCallback }: { loginCallback: (value: string) => void }) => {
@@ -16,6 +17,7 @@ const LoginForm = ({ loginCallback }: { loginCallback: (value: string) => void }
         Router.push('/')
       }
       loginCallback(value)
+      toast.success(`Вы успешно авторизовались под пользователем ${value}`)
     }
   }
 
@@ -29,12 +31,12 @@ const LoginForm = ({ loginCallback }: { loginCallback: (value: string) => void }
     <div className="flex min-w-[400px] max-w-5xl flex-col gap-6 rounded-lg bg-secondary px-14 py-12 text-center shadow-md">
       <div className="text-lg">Вход в Fit Application</div>
       <input
-        className="rounded-sm px-4 py-2 text-sm text-gray"
+        className="rounded-sm px-4 py-2 text-md text-gray"
         ref={inputRef}
         placeholder="Введите ID Telegram"
         onChange={changeItem}
       />
-      <button onClick={handleLogin} className="rounded-md border border-primaryDark bg-primary/60">
+      <button onClick={handleLogin} className="rounded-md border border-primaryDark bg-primary/60 py-1">
         Вход
       </button>
     </div>

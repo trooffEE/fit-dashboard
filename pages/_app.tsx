@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { ToastContainer } from 'react-toastify'
 import { useEffect, useState } from 'react'
-import { Poppins } from 'next/font/google'
+import { Poppins, Roboto } from 'next/font/google'
 import dayjs from 'dayjs'
 import * as locale from 'dayjs/locale/ru'
 import isoWeek from 'dayjs/plugin/isoWeek'
@@ -14,9 +14,9 @@ import NavigationBar from '~/components/NavigationBar'
 import '~/styles/globals.css'
 import { AuthContext } from '~/contexts/auth'
 import { currentUser, isLoggedIn as loginHelper } from '~/hooks/isLoggedIn'
-import NoSSR from '~/components/NoSSR' 
+import NoSSR from '~/components/NoSSR'
 import LoginForm from '~/components/login/LoginForm'
-import 'react-toastify/dist/ReactToastify.css';
+import 'react-toastify/dist/ReactToastify.css'
 
 dayjs.extend(weekday)
 dayjs.extend(localizedFormat)
@@ -25,9 +25,11 @@ dayjs.extend(isoWeek)
 dayjs.extend(localeData)
 dayjs.extend(weekOfYear)
 
-const font = Poppins({
-  weight: '400',
+const font = Roboto({
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
   subsets: ['latin'],
+  display: 'swap',
 })
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -60,11 +62,16 @@ export default function App({ Component, pageProps }: AppProps) {
           <div className={`col-span-full px-3 py-4 ${font.className} ${layoutFix}`}>
             {isLoggedIn ? (
               <>
-                <div className="flex w-full justify-between">
+                <div className="flex w-full items-center justify-between">
                   {currentTimeString && (
                     <>
                       <span>{_.capitalize(currentTimeString)}</span>
-                      <button onClick={logOut}>LogOut</button>
+                      <button
+                        className="rounded-md border border-primaryDark bg-secondary/60 px-3 py-2"
+                        onClick={logOut}
+                      >
+                        LogOut
+                      </button>
                     </>
                   )}
                 </div>

@@ -2,9 +2,9 @@ import { AxiosError, AxiosResponse } from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { AuthContext } from '~/contexts/auth'
+import Router from 'next/router'
 
-
-const useFetch = <T extends unknown>(callbackFetch: () => Promise<AxiosResponse<T, any>>): [T, boolean] => {
+const useFetch = <T extends unknown>(callbackFetch: (...params: any[]) => Promise<AxiosResponse<T, any>>): [T, boolean] => {
   const [isLoading, setIsLoading] = useState(true)
   const [data, setData] = useState<any>(null)
 
@@ -30,7 +30,13 @@ export const useCodeCheck = <T extends unknown>() => {
     }
   }
 
-  return { checkCode }
+  const redirectTo = (to: string) => {
+    Router.push({
+      pathname: to,
+    })
+  }
+
+  return { checkCode, redirectTo }
 }
 
 export default useFetch

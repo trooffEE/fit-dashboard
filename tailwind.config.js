@@ -13,10 +13,12 @@ module.exports = {
       white: '#FEFFFE',
       whiteSecondary: '#E9EBF8',
       gray: '#B4B8C5',
+      gray: '#000000',
+      green: '#47C6A0',
     },
     extend: {
       gridTemplateColumns: {
-        layout: '120px repeat(12, minmax(0, 1fr))'
+        layout: '200px repeat(12, minmax(0, 1fr))'
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import {
   CartesianGrid,
   XAxis,
@@ -15,7 +15,7 @@ import {
 import GraphContainer from '~/components/GraphContainer'
 import LoaderContent from '~/components/LoaderContent'
 import NoSSR from '~/components/NoSSR'
-import useFetch from '~/hooks/fetch'
+import { AuthContext } from '~/contexts/auth'
 import { DashboardResponse, fetchDashboard } from '~/services/dashboard'
 import { getColors } from '~/utils/getColors'
 
@@ -104,28 +104,29 @@ const CaloriesConsumedGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ 
   )
 }
 
-
 export default function Home() {
-  const [data, isLoading] = useFetch(fetchDashboard)
   const [dataSleep, setDataSleep] = useState<DashboardResponse['data'] | null>(null)
   const [dataCalories, setDataCalories] = useState<DashboardResponse['data'] | null>(null)
+  const { getUsername } = useContext(AuthContext)
 
   useEffect(() => {
-    if (data) {
-      data.forEach((item) => {
-        switch (item.type) {
-          case 'sleep':
-            setDataSleep(item.data)
-            break
-          case 'calories':
-            setDataCalories(item.data)
-            break
-          default:
-            break
-        }
+    fetchDashboard(getUsername())
+      .then(({ data }) => {
+        data.forEach((item) => {
+          switch (item.type) {
+            case 'sleep':
+              setDataSleep(item.data)
+              break
+            case 'calories':
+              setDataCalories(item.data)
+              break
+            default:
+              break
+          }
+        })
       })
-    }
-  }, [data])
+      .catch(() => console.log(e))
+  }, [])
 
   if (!dataSleep) return null
 
@@ -134,7 +135,11 @@ export default function Home() {
       {dataSleep && (
         <GraphContainer className="col-span-2">
           <SleepGraph data={dataSleep} />
-          <div className="pt-4 text-center">Сон</div>
+          <div className="pt-4 text-center">
+            <button>Прошлая неделя</button>
+            <div>Сон</div>
+            <button>Следующая неделя</button>
+          </div>
         </GraphContainer>
       )}
       {dataCalories && (

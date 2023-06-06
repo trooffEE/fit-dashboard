@@ -12,10 +12,10 @@ export type DashboardResponse = {
   }[]
 }
 
-export const fetchDashboard = () => {
+export const fetchDashboard = (userName: string) => {
   return axios<DashboardResponse[]>({
     method: 'get',
-    url: backendApiString('/public/dashboard'),
+    url: backendApiString(`/public/dashboard?username=${userName}`),
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json',
