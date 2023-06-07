@@ -14,12 +14,11 @@ const Exercise = (props: Props) => {
   const exerciseRedirect = (exercise: ExerciseResponse) => {
     Router.push({ pathname: `/exercise/${exercise.id}` })
   }
-  
-  if (isLoading || !data) return 'Loading...'
+
+  if (isLoading || !data) return 'Загрузка...'
 
   const activeExercises = data.filter((exercise) => exercise.enabled)
   const inactiveExercises = data.filter((exercise) => !exercise.enabled)
-
 
   return (
     <div className="flex flex-col gap-10">

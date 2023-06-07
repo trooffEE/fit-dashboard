@@ -10,8 +10,10 @@ const useFetch = <S extends (...params: any[]) => Promise<AxiosResponse<unknown,
   config?: {
     transform?: (...params: unknown[]) => any
     options?: {
-      authOnly?: boolean
+      authOnly?: boolean,
     }
+    debug?: boolean,
+    errorInterceptor?: () => void
   }
 ): [Awaited<T>['data'], boolean] => {
   const [isLoading, setIsLoading] = useState(true)
@@ -23,18 +25,26 @@ const useFetch = <S extends (...params: any[]) => Promise<AxiosResponse<unknown,
   const options = config?.options
 
   useEffect(() => {
-    setIsLoading(true)
-    callbackFetch(...cachedParams)
-      .then(({ data }) => {
-        setData(transform ? transform(data) : data)
-      })
-      .catch((e) => {
-        if (options?.authOnly) {
-          checkCode(e)
-          redirectTo('/')
-        }
-      })
-      .finally(() => setIsLoading(false))
+    // Note: Данные значения не являются валидными при отправки, 
+    // поэтому если они приходят, то мы ничего не отправляем на сервер
+    if (!args.some((item) => item === undefined || Number.isNaN(item))) {
+      setIsLoading(true)
+      callbackFetch(...cachedParams)
+        .then(({ data }) => {
+          setData(transform ? transform(data) : data)
+        })
+        .catch((e) => {
+          if (options?.authOnly && e.response?.status === 403) {
+            checkCode(e)
+            redirectTo('/')
+            return
+          }
+          config?.errorInterceptor && config?.errorInterceptor()
+        })
+        .finally(() => setIsLoading(false))
+    } else {
+      config?.debug && console.log(args, 'не валидные параметры при одном из рендеров')
+    }
   }, [...cachedParams])
 
   return [data, isLoading]

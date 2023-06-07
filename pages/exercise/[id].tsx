@@ -1,33 +1,28 @@
-import { useRouter } from 'next/router'
-import React, { useContext, useEffect, useState } from 'react'
+import router from 'next/router'
+import React, { useContext } from 'react'
 import { toast } from 'react-toastify'
 import { AuthContext } from '~/contexts/auth'
 import useFetch, { useCodeCheck } from '~/hooks/fetch'
-import { ExerciseResponse, fetchExercise } from '~/services/trainings'
+import { fetchExercise } from '~/services/trainings'
 
 type Props = {}
 
 const ExerciseItemPage = (props: Props) => {
-  const { checkCode, redirectTo } = useCodeCheck()
-  const [exercise, setExercise] = useState<ExerciseResponse | null>(null)
-  const router = useRouter()
-  const { isLoggedIn, getUsername } = useContext(AuthContext)
+  const { redirectTo } = useCodeCheck()
+  const { id } = router.query
+  const { getUsername } = useContext(AuthContext)
+  const [data, isLoading] = useFetch(fetchExercise, [getUsername(), Number(id)], {
+    options: {
+      authOnly: true,
+    },
+    debug: true,
+    errorInterceptor: () => {
+      toast.error('Не удалость получить информацию о выбранной трениировки')
+      redirectTo('/exercise')
+    },
+  })
 
-  useEffect(() => {
-    if (isLoggedIn && router.query.id) {
-      fetchExercise(getUsername(), Number(router.query.id))
-        .then(({ data }) => {
-          setExercise(data)
-        })
-        .catch((data) => {
-          if (data.response?.status === 403) {
-            checkCode(data)
-          } else {
-            redirectTo('/exercise')
-          }
-        })
-    }
-  }, [router.query.id])
+  if (isLoading) return 'Загрузка...'
 
   return (
     <div className="grid grid-cols-12 gap-8">
@@ -37,12 +32,14 @@ const ExerciseItemPage = (props: Props) => {
       >
         Вернуться на экран тренировок
       </button>
-      {exercise && <div className="col-span-full">
-        <div>
-          {exercise.name} была создана {exercise.createdDate}
+      {data && (
+        <div className="col-span-full">
+          <div>
+            {data.name} была создана {data.createdDate}
+          </div>
+          <textarea className="text-black" defaultValue={data.comment}></textarea>
         </div>
-        <textarea className='text-black' defaultValue={exercise.comment}></textarea>
-      </div>}
+      )}
     </div>
   )
 }

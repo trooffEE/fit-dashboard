@@ -6,7 +6,7 @@ type Props = {
 }
 
 const LoaderContent = ({ isLoading, content }: Props) => {
-  return <>{isLoading ? <div>is loading...</div> : content}</>
+  return <>{isLoading ? <div>Загрузка...</div> : content}</>
 }
 
 export default LoaderContent
