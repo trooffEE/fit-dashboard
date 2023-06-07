@@ -2,32 +2,24 @@ import Router from 'next/router'
 import React, { useContext, useEffect, useState } from 'react'
 import ExerciseCard from '~/components/trainings/ExerciseCard'
 import { AuthContext } from '~/contexts/auth'
-import { useCodeCheck } from '~/hooks/fetch'
+import useFetch, { useCodeCheck } from '~/hooks/fetch'
 import { ExerciseResponse, fetchAllExercises } from '~/services/trainings'
 
 type Props = {}
 
 const Exercise = (props: Props) => {
-  const [exercises, setExercises] = useState<ExerciseResponse[]>([])
-  const { isLoggedIn, getUsername } = useContext(AuthContext)
-  const { checkCode } = useCodeCheck()
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchAllExercises(getUsername())
-        .then(({ data }) => {
-          setExercises(data)
-        })
-        .catch(checkCode)
-    }
-  }, [])
+  const { getUsername } = useContext(AuthContext)
+  const [data, isLoading] = useFetch(fetchAllExercises, [getUsername()], { options: { authOnly: true } })
 
   const exerciseRedirect = (exercise: ExerciseResponse) => {
     Router.push({ pathname: `/exercise/${exercise.id}` })
   }
+  
+  if (isLoading || !data) return 'Loading...'
 
-  const activeExercises = exercises.filter((exercise) => exercise.enabled)
-  const inactiveExercises = exercises.filter((exercise) => !exercise.enabled)
+  const activeExercises = data.filter((exercise) => exercise.enabled)
+  const inactiveExercises = data.filter((exercise) => !exercise.enabled)
+
 
   return (
     <div className="flex flex-col gap-10">

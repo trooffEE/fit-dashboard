@@ -7,11 +7,20 @@ import Router from 'next/router'
 const useFetch = <S extends (...params: any[]) => Promise<AxiosResponse<unknown, any>>, T extends ReturnType<S>>(
   callbackFetch: S,
   args: Parameters<S>,
-  transform?: (...params: unknown[]) => any
+  config?: {
+    transform?: (...params: unknown[]) => any
+    options?: {
+      authOnly?: boolean
+    }
+  }
 ): [Awaited<T>['data'], boolean] => {
   const [isLoading, setIsLoading] = useState(true)
+  const { checkCode, redirectTo } = useCodeCheck()
+
   const cachedParams = useMemo(() => [...args], [...args])
   const [data, setData] = useState<any>(null)
+  const transform = config?.transform
+  const options = config?.options
 
   useEffect(() => {
     setIsLoading(true)
@@ -19,7 +28,12 @@ const useFetch = <S extends (...params: any[]) => Promise<AxiosResponse<unknown,
       .then(({ data }) => {
         setData(transform ? transform(data) : data)
       })
-      .catch((e) => console.log(e))
+      .catch((e) => {
+        if (options?.authOnly) {
+          checkCode(e)
+          redirectTo('/')
+        }
+      })
       .finally(() => setIsLoading(false))
   }, [...cachedParams])
 
