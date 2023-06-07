@@ -31,10 +31,13 @@ const LoginForm = ({ loginCallback }: { loginCallback: (value: string) => void }
     <div className="flex min-w-[400px] max-w-5xl flex-col gap-6 rounded-lg bg-secondary px-14 py-12 text-center shadow-md">
       <div className="text-lg">Вход в Fit Application</div>
       <input
-        className="rounded-sm px-4 py-2 text-md text-gray"
-        ref={inputRef}
-        placeholder="Введите ID Telegram"
         onChange={changeItem}
+        ref={inputRef}
+        type="text"
+        id="first_name"
+        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        placeholder="Введите ID Telegram"
+        required
       />
       <button onClick={handleLogin} className="rounded-md border border-primaryDark bg-primary/60 py-1">
         Вход

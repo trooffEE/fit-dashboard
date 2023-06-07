@@ -135,7 +135,10 @@ export default function Home() {
 
   const content = (
     <>
-      <section className="mb-4 grid grid-cols-12 gap-6 items-center">
+      <div className="mb-10 py-4 text-center">
+        <span className="text-xl font-bold">Дашборд 🤟</span>
+      </div>
+      <section className="mb-4 grid grid-cols-12 items-center gap-6">
         <button
           className="col-span-3 h-10 w-fit rounded-md border border-primaryDark bg-secondary/60 px-3 py-2"
           onClick={goPreviousWeek}
@@ -174,9 +177,6 @@ export default function Home() {
 
   return (
     <>
-      <div className="mb-10 py-4 text-center">
-        <span className="text-xl font-bold">Дашборд 🤟</span>
-      </div>
       <LoaderContent isLoading={isLoading} content={content} />
     </>
   )

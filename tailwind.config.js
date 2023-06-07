@@ -4,6 +4,8 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
     './app/**/*.{js,ts,jsx,tsx}',
+    './public/**/*.html',
+    'node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     colors: {
@@ -12,20 +14,20 @@ module.exports = {
       secondary: '#456990',
       white: '#FEFFFE',
       whiteSecondary: '#E9EBF8',
-      gray: '#B4B8C5',
-      gray: '#000000',
-      green: '#47C6A0',
+      greenAccent: '#47C6A0',
     },
     extend: {
       gridTemplateColumns: {
-        layout: '200px repeat(12, minmax(0, 1fr))'
+        layout: '200px repeat(12, minmax(0, 1fr))',
+      },
+      height: {
+        'loading': 'calc(100vh - 42px - 16px * 2)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
     },
   },
-  plugins: [],
+  plugins: [require('flowbite/plugin')],
 }

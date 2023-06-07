@@ -1,8 +1,9 @@
 import Router from 'next/router'
-import React, { useContext, useEffect, useState } from 'react'
-import ExerciseCard from '~/components/trainings/ExerciseCard'
+import React, { useContext } from 'react'
+import LoaderContent from '~/components/LoaderContent'
+import TrainingCard from '~/components/trainings/TrainingCard'
 import { AuthContext } from '~/contexts/auth'
-import useFetch, { useCodeCheck } from '~/hooks/fetch'
+import useFetch from '~/hooks/fetch'
 import { ExerciseResponse, fetchAllExercises } from '~/services/trainings'
 
 type Props = {}
@@ -15,18 +16,16 @@ const Exercise = (props: Props) => {
     Router.push({ pathname: `/exercise/${exercise.id}` })
   }
 
-  if (isLoading || !data) return 'Загрузка...'
+  const activeExercises = data && data.filter((exercise) => exercise.enabled)
+  const inactiveExercises = data && data.filter((exercise) => !exercise.enabled)
 
-  const activeExercises = data.filter((exercise) => exercise.enabled)
-  const inactiveExercises = data.filter((exercise) => !exercise.enabled)
-
-  return (
+  const Content = data && (
     <div className="flex flex-col gap-10">
       {activeExercises.length !== 0 && (
         <div className="grid grid-cols-12 gap-8">
           <h1 className="col-span-full text-2xl">Активные на данный момент тренировки</h1>
           {activeExercises.map((exercise) => (
-            <ExerciseCard data={exercise} onClick={() => exerciseRedirect(exercise)} />
+            <TrainingCard data={exercise} onClick={() => exerciseRedirect(exercise)} />
           ))}
         </div>
       )}
@@ -34,11 +33,15 @@ const Exercise = (props: Props) => {
         <div className="grid grid-cols-12 gap-8">
           <h1 className="col-span-full text-2xl">Неактивные на данный момент тренировки</h1>
           {inactiveExercises.map((exercise) => (
-            <ExerciseCard data={exercise} onClick={() => exerciseRedirect(exercise)} />
+            <TrainingCard data={exercise} onClick={() => exerciseRedirect(exercise)} />
           ))}
         </div>
       )}
     </div>
+  )
+
+  return (
+    <LoaderContent isLoading={isLoading} content={Content} />
   )
 }
 
