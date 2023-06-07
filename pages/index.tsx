@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useMemo } from 'react'
 import {
   CartesianGrid,
   XAxis,
@@ -16,8 +16,12 @@ import GraphContainer from '~/components/GraphContainer'
 import LoaderContent from '~/components/LoaderContent'
 import NoSSR from '~/components/NoSSR'
 import { AuthContext } from '~/contexts/auth'
+import useFetch from '~/hooks/fetch'
+import { usePeriodDate } from '~/hooks/usePeriodDate'
 import { DashboardResponse, fetchDashboard } from '~/services/dashboard'
 import { getColors } from '~/utils/getColors'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleRight, faAngleLeft } from '@fortawesome/free-solid-svg-icons'
 
 const dataConverter = (data: DashboardResponse['data']) => {
   const dataSorted = _.sortBy(data, (dataItem) => {
@@ -37,8 +41,8 @@ const c = getColors()
 const SleepGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ data }) => {
   const dataInner = dataConverter(data)
   return (
-    <ResponsiveContainer width="100%" height={500}>
-      <LineChart width={600} height={400} data={dataInner}>
+    <ResponsiveContainer width="100%" height={350}>
+      <LineChart width={600} height={350} data={dataInner}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" stroke={c.whiteSecondary} strokeWidth={2} />
         <YAxis scale="auto" stroke={c.whiteSecondary} strokeWidth={2} />
@@ -56,10 +60,10 @@ const CaloriesConsumedGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ 
   const stopOpacityStart = 0.7
   const stopOpacityEnd = 0.2
   return (
-    <ResponsiveContainer width="100%" height={500}>
+    <ResponsiveContainer width="100%" height={350}>
       <ComposedChart
         width={730}
-        height={250}
+        height={300}
         data={dataConverter(data)}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
@@ -108,55 +112,72 @@ export default function Home() {
   const [dataSleep, setDataSleep] = useState<DashboardResponse['data'] | null>(null)
   const [dataCalories, setDataCalories] = useState<DashboardResponse['data'] | null>(null)
   const { getUsername } = useContext(AuthContext)
+  const { period, goNextWeek, goPreviousWeek } = usePeriodDate()
+  const [data, isLoading] = useFetch(fetchDashboard, [getUsername(), period])
 
   useEffect(() => {
-    fetchDashboard(getUsername())
-      .then(({ data }) => {
-        data.forEach((item) => {
-          switch (item.type) {
-            case 'sleep':
-              setDataSleep(item.data)
-              break
-            case 'calories':
-              setDataCalories(item.data)
-              break
-            default:
-              break
-          }
-        })
+    data &&
+      data.forEach((item) => {
+        switch (item.type) {
+          case 'sleep':
+            setDataSleep(item.data)
+            break
+          case 'calories':
+            setDataCalories(item.data)
+            break
+          default:
+            break
+        }
       })
-      .catch(() => console.log(e))
-  }, [])
+  }, [data])
 
   if (!dataSleep) return null
 
   const content = (
-    <main className="grid grid-cols-4 gap-6">
-      {dataSleep && (
-        <GraphContainer className="col-span-2">
-          <SleepGraph data={dataSleep} />
-          <div className="pt-4 text-center">
-            <button>Прошлая неделя</button>
-            <div>Сон</div>
-            <button>Следующая неделя</button>
-          </div>
-        </GraphContainer>
-      )}
-      {dataCalories && (
-        <GraphContainer className="col-span-2">
-          <CaloriesConsumedGraph data={dataCalories} />
-          <div className="pt-4 text-center">Калории</div>
-        </GraphContainer>
-      )}
-    </main>
+    <>
+      <section className="mb-4 grid grid-cols-12 gap-6 items-center">
+        <button
+          className="col-span-3 h-10 w-fit rounded-md border border-primaryDark bg-secondary/60 px-3 py-2"
+          onClick={goPreviousWeek}
+        >
+          <FontAwesomeIcon icon={faAngleLeft} />
+        </button>
+        <div className="col-span-6 text-center text-lg">
+          Информация о сне и тренировках за период <br />с {dayjs(period.start).format('DD.MM.YYYY')} по{' '}
+          {dayjs(period.end).format('DD.MM.YYYY')}
+        </div>
+        <button
+          className="col-span-3 h-10 w-fit justify-self-end rounded-md border border-primaryDark bg-secondary/60 px-3 py-2"
+          onClick={goNextWeek}
+        >
+          <FontAwesomeIcon icon={faAngleRight} />
+        </button>
+      </section>
+      <main className="grid grid-cols-12 gap-6">
+        {dataSleep && (
+          <GraphContainer className="col-span-6">
+            <SleepGraph data={dataSleep} />
+            <div className="pt-4 text-center">
+              <div>Сон</div>
+            </div>
+          </GraphContainer>
+        )}
+        {dataCalories && (
+          <GraphContainer className="col-span-6">
+            <CaloriesConsumedGraph data={dataCalories} />
+            <div className="pt-4 text-center">Калории</div>
+          </GraphContainer>
+        )}
+      </main>
+    </>
   )
 
   return (
-    <NoSSR>
+    <>
       <div className="mb-10 py-4 text-center">
         <span className="text-xl font-bold">Дашборд 🤟</span>
       </div>
       <LoaderContent isLoading={isLoading} content={content} />
-    </NoSSR>
+    </>
   )
 }
