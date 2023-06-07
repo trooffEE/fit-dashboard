@@ -4,7 +4,7 @@ import { toast } from 'react-toastify'
 import LoaderContent from '~/components/LoaderContent'
 import { AuthContext } from '~/contexts/auth'
 import useFetch, { useCodeCheck } from '~/hooks/fetch'
-import { ExerciseTraining, fetchExercise } from '~/services/trainings'
+import { ExerciseTraining, fetchTraining } from '~/services/trainings'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons'
 
@@ -15,11 +15,11 @@ const ExerciseItemPage = () => {
   const [currentTraining, setCurrentTraining] = useState<ExerciseTraining | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
   const { getUsername } = useContext(AuthContext)
-  const [data, isLoading] = useFetch(fetchExercise, [getUsername(), Number(id)], {
+  const [data, isLoading] = useFetch(fetchTraining, [getUsername(), Number(id)], {
     options: { authOnly: true },
     errorInterceptor: () => {
       toast.error('Не удалость получить информацию о выбранной трениировки')
-      redirectTo('/exercise')
+      redirectTo('/training')
     },
   })
   useEffect(() => {
@@ -80,7 +80,7 @@ const ExerciseItemPage = () => {
           {currentTraining && (
             <div className="my-4 flex flex-col gap-5">
               <div className="grid grid-cols-6 items-center gap-6 text-xl">
-                <div className="col-span-2">Название тренировки:</div>
+                <div className="col-span-2">Название упражнения:</div>
                 <input
                   type="text"
                   id="first_name"
@@ -92,7 +92,7 @@ const ExerciseItemPage = () => {
                 />
               </div>
               <div className="grid grid-cols-6 items-start gap-6 text-xl">
-                <div className="col-span-2">Комментарий к тренировке:</div>
+                <div className="col-span-2">Комментарий к упражнению:</div>
                 <textarea
                   id="exercise_comment"
                   rows={8}

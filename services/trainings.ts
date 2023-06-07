@@ -39,7 +39,7 @@ export type ExerciseResponse = {
   enabled: boolean
 }
 
-export const fetchAllExercises = (userName: string) => {
+export const fetchAllTrainings = (userName: string) => {
   return axios<ExerciseResponse[]>({
     method: 'get',
     url: backendApiString(`/public/trainings?username=${userName}`),
@@ -48,10 +48,10 @@ export const fetchAllExercises = (userName: string) => {
       'Content-Type': 'application/json',
     },
     withCredentials: false,
-  }).then((res) => res)
+  })
 }
 
-export const fetchExercise = (userName: string, exerciseId: number) => {
+export const fetchTraining = (userName: string, exerciseId: number) => {
   return axios<ExerciseResponse>({
     method: 'get',
     url: backendApiString(`/public/trainings/${exerciseId}?username=${userName}`),
@@ -60,5 +60,20 @@ export const fetchExercise = (userName: string, exerciseId: number) => {
       'Content-Type': 'application/json',
     },
     withCredentials: false,
-  }).then((res) => res)
+  })
+}
+
+export const fetchAllExercises = (userName: string) => {
+  return axios<ExerciseResponse>({
+    method: 'get',
+    url: backendApiString(`/public/trainings/exercises`),
+    params: {
+      username: userName,
+    },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+    withCredentials: false,
+  })
 }

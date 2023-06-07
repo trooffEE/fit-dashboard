@@ -17,7 +17,6 @@ const LoginForm = ({ loginCallback }: { loginCallback: (value: string) => void }
         Router.push('/')
       }
       loginCallback(value)
-      toast.success(`Вы успешно авторизовались под пользователем ${value}`)
     }
   }
 

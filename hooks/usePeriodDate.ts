@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { useState } from 'react'
+import { toast } from 'react-toastify'
 import { start } from 'repl'
 import { DateTimePeriod } from '~/services/dashboard'
 
@@ -17,6 +18,8 @@ export const usePeriodDate = () => {
         start: dayjs(period.start).add(7, 'day').format('YYYY-MM-DD'),
         end: endDate.format('YYYY-MM-DD'),
       })
+    } else {
+      toast.warning('В будущем еще нет статистики 🥲')
     }
   }
   const goPreviousWeek = () => {

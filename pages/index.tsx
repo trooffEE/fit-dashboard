@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { useEffect, useState, useContext, useMemo } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import {
   CartesianGrid,
   XAxis,
@@ -14,7 +14,6 @@ import {
 } from 'recharts'
 import GraphContainer from '~/components/GraphContainer'
 import LoaderContent from '~/components/LoaderContent'
-import NoSSR from '~/components/NoSSR'
 import { AuthContext } from '~/contexts/auth'
 import useFetch from '~/hooks/fetch'
 import { usePeriodDate } from '~/hooks/usePeriodDate'
@@ -30,10 +29,35 @@ const dataConverter = (data: DashboardResponse['data']) => {
     name: dayjs(item.date).format('ddd'),
     needed: item.plan,
     actual: item.actual,
-    avgPlan: item.planAvg,
-    avgActual: item.actualAvg,
+    avgPlan: item.planAvg.toFixed(2),
+    avgActual: item.actualAvg.toFixed(2),
   }))
   return dataSorted
+}
+
+const formatWeek = (value: any, name: any, props: any) => {
+  const actualData = new Map([
+    ['needed', 'Необходимое'],
+    ['actual', 'Фактическое'],
+    ['avgPlan', 'Сред.необходимое'],
+    ['avgActual', 'Сред.фактическое'],
+  ])
+
+  return [value, `${actualData.get(name)}`]
+}
+
+const formatLabel = (value: string) => {
+  const weekMap = new Map([
+    ['пнд', 'Понедельник'],
+    ['втр', 'Вторник'],
+    ['срд', 'Среда'],
+    ['чтв', 'Четверг'],
+    ['сбт', 'Суббота'],
+    ['птн', 'Пятница'],
+    ['вск', 'Воскресенье'],
+  ])
+
+  return weekMap.get(value)
 }
 
 const c = getColors()
@@ -46,7 +70,8 @@ const SleepGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ data }) => 
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" stroke={c.whiteSecondary} strokeWidth={2} />
         <YAxis scale="auto" stroke={c.whiteSecondary} strokeWidth={2} />
-        <Tooltip wrapperStyle={{ background: 'red' }} />
+        <Tooltip formatter={formatWeek} labelFormatter={formatLabel} />
+        <Line type="monotone" dataKey="avgActual" stroke={'#47C6A0'} strokeWidth={3} fill={'white'} />
         <Line type="monotone" dataKey="needed" stroke={'#F1D16F'} strokeWidth={3} fill={'#F1D16F'} />
         <Line type="monotone" dataKey="actual" stroke={'#ADDACC'} strokeWidth={3} fill="#82ca9d" />
       </LineChart>
@@ -80,17 +105,17 @@ const CaloriesConsumedGraph: React.FC<{ data: DashboardResponse['data'] }> = ({ 
         <XAxis dataKey="name" stroke={c.whiteSecondary} strokeWidth={2} />
         <YAxis scale="auto" stroke={c.whiteSecondary} strokeWidth={2} />
         <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip />
+        <Tooltip formatter={formatWeek} labelFormatter={formatLabel} />
         <Area
           type="monotone"
-          dataKey="caloriesNeeded"
+          dataKey="needed"
           stroke={caloriesNeededColor}
           fillOpacity={1}
           fill="url(#colorUv)"
         />
         <Area
           type="monotone"
-          dataKey="caloriesActual"
+          dataKey="actual"
           stroke={caloriesActualColor}
           fillOpacity={1}
           fill="url(#colorPv)"
@@ -113,7 +138,7 @@ export default function Home() {
   const [dataCalories, setDataCalories] = useState<DashboardResponse['data'] | null>(null)
   const { getUsername } = useContext(AuthContext)
   const { period, goNextWeek, goPreviousWeek } = usePeriodDate()
-  const [data, isLoading] = useFetch(fetchDashboard, [getUsername(), period])
+  const [data, isLoading] = useFetch(fetchDashboard, [getUsername(), period], { options: { authOnly: true }})
 
   useEffect(() => {
     data &&

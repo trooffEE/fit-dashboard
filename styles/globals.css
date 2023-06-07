@@ -25,3 +25,13 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.recharts-default-tooltip {
+  background-color: rgba(69, 105, 144, 0.9) !important;
+  border: 1px solid white !important;
+}
+
+.recharts-tooltip-label {
+  color: white;
+  text-transform: capitalize;
+}
