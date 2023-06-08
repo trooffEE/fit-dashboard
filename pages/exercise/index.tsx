@@ -13,7 +13,7 @@ const ExercisePage = (props: Props) => {
   const { getUsername } = useContext(AuthContext)
   const [data, isLoading] = useFetch(fetchAllExercises, [getUsername()], { options: { authOnly: true } })
   const [exercises, setExercises] = useState<typeof data>([])
-  const [currentAddingExercise, setCurrentlyAddingExercise] = useState<null | {}>(null)
+  const [currentlyAddingExercise, setCurrentlyAddingExercise] = useState<null | {}>(null)
 
   useEffect(() => {
     if (data) setExercises(exercises)
@@ -35,6 +35,9 @@ const ExercisePage = (props: Props) => {
           </button>
         </div>
         <div className="purple-500/50 col-span-12 grid grid-cols-12 gap-8">
+          {currentlyAddingExercise && (
+            <ExerciseForm exercise={currentlyAddingExercise} onSave={() => {}} isHiddenWithCurtain />
+          )}
           {exercises.map((exercise) => (
             <ExerciseForm exercise={exercise} onSave={() => {}} isHiddenWithCurtain />
           ))}
