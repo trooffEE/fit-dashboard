@@ -57,7 +57,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <NoSSR>
       <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, getUsername }}>
-        <div className="grid h-screen w-screen grid-cols-layout gap-4 bg-primary">
+        <div className="grid min-h-screen w-screen grid-cols-layout gap-4 bg-primary">
           {isLoggedIn && <NavigationBar />}
           <div className={`col-span-full px-3 py-4 ${font.className} ${layoutFix}`}>
             {isLoggedIn ? (

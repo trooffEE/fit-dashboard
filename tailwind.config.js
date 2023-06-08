@@ -1,3 +1,5 @@
+const colors = require('tailwindcss/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -15,6 +17,16 @@ module.exports = {
       white: '#FEFFFE',
       whiteSecondary: '#E9EBF8',
       greenAccent: '#47C6A0',
+      black: colors.black,
+      white: colors.white,
+      slate: colors.slate,
+      green: colors.emerald,
+      yellow: colors.amber,
+      sky: colors.sky,
+      cyan: colors.cyan,
+      pink: colors.fuchsia,
+      indigo: colors.indigo,
+      purple: colors.purple,
     },
     extend: {
       gridTemplateColumns: {

@@ -23,7 +23,7 @@ const Exercise = (props: Props) => {
     <div className="flex flex-col gap-10">
       {activeExercises.length !== 0 && (
         <div className="grid grid-cols-12 gap-8">
-          <h1 className="col-span-full text-2xl">Активные на данный момент тренировки</h1>
+          <h1 className="col-span-full mt-4 text-2xl">Активные на данный момент тренировки</h1>
           {activeExercises.map((exercise) => (
             <TrainingCard data={exercise} onClick={() => exerciseRedirect(exercise)} />
           ))}
@@ -31,7 +31,7 @@ const Exercise = (props: Props) => {
       )}
       {inactiveExercises.length !== 0 && (
         <div className="grid grid-cols-12 gap-8">
-          <h1 className="col-span-full text-2xl">Неактивные на данный момент тренировки</h1>
+          <h1 className="col-span-full mt-4 text-2xl">Активные на данный момент тренировки</h1>
           {inactiveExercises.map((exercise) => (
             <TrainingCard data={exercise} onClick={() => exerciseRedirect(exercise)} />
           ))}

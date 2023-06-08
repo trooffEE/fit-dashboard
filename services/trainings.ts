@@ -12,7 +12,7 @@ export type ExerciseTraining = {
     updatedDate: string
     deletedDate: null
     name: `@${string}`
-  }
+  } | null
   name: string
   sets: number
   repeats: number
@@ -64,7 +64,7 @@ export const fetchTraining = (userName: string, exerciseId: number) => {
 }
 
 export const fetchAllExercises = (userName: string) => {
-  return axios<ExerciseResponse>({
+  return axios<ExerciseTraining[]>({
     method: 'get',
     url: backendApiString(`/public/trainings/exercises`),
     params: {
